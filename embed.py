@@ -4,18 +4,18 @@ from utils import embed_umap, embed_tsne
 import numpy as np
 import matplotlib.pyplot as plt
 import config
-from utils import draw_plot_3D, draw_plot_3D_growing
+from utils import draw_plot_3D, draw_plot_3D_growing, center_and_rescale
 
 mode = "plot"
 # mode = "embed"
 
-experiment_name = "1d"
+experiment_name = "3hour pca"
 color_column = 1  # 0=day, 1=hour, 2=min, 3=sec
-MOVIE_IMAGE_DIR = r'D:\Experiments data\Dimensionality Reduction\Time counter\videos\1d c1 growing'
+MOVIE_IMAGE_DIR = r'D:\Experiments data\Dimensionality Reduction\Time counter\videos\12hour pca'
 
 colormaps = {0: 'viridis', 1: 'terrain', 2: 'inferno', 3: 'Greys_r'}
 
-n_days = 2
+n_days = 1
 n_hours = 24
 n_mins = 60
 n_secs = 60
@@ -26,7 +26,7 @@ if mode == "embed":
     counter = []  # array of timestamps
 
     for day in range(n_days):
-        for hour in range(n_hours):
+        for hour in range(12):
             for minute in range(n_mins):
                 for sec in range(0, n_secs, decimation):
                     counter.extend([[day, hour, minute, sec]])
@@ -37,17 +37,22 @@ if mode == "embed":
 
     # set normalization of each counter via denominator
     # standard denominator: [1, (n_hours - 1)*2, (n_mins - 1) * 4, (n_secs - 1) * 12]
-    demoninator = np.array([[(n_days - 1), (n_hours - 1) * 1, (n_mins - 1) * 1, (n_secs - 1) * 1]]).astype(
-        'float')  # (experiment name: "uniform") the ratio between the min and second denominator matters most in determining the shape of the "1-hour strips"
-    # demoninator = np.array([[1, 1, 1, 1]]).astype('float')  # no normalization (aka denom 1111)
+    denominator = np.array([1, (n_hours - 1) * 2, (n_mins - 1) * 4, (n_secs - 1) * 12]).astype('float')
+    # denominator = np.array([[(n_days - 1), (n_hours - 1) * 1, (n_mins - 1) * 1, (n_secs - 1) * 1]]).astype(
+    #     'float')  # (experiment name: "uniform") the ratio between the min and second denominator matters most in determining the shape of the "1-hour strips"
+    # denominator = np.array([[1, 1, 1, 1]]).astype('float')  # no normalization (aka denom 1111)
 
-    counter_norm /= demoninator
+    counter_norm /= denominator
 
     # embed
     emb = embed_tsne(counter_norm)
 
     # umap
     # emb = embed_umap(counter_norm)
+
+    # PCA-like
+    # emb = counter_norm[:, 1:]
+    # emb = center_and_rescale(emb)
 
     np.save(f'{OUTPUT_DATA_DIR}\\{experiment_name}_counter_norm.npy', counter_norm, allow_pickle=True)
     np.save(f'{OUTPUT_DATA_DIR}\\{experiment_name}_emb.npy', emb, allow_pickle=True)
@@ -78,14 +83,16 @@ elif mode == 'plot':
 
     N_frames = 300 * 8
 
-    particle_size = 60
+    particle_size = 80
+    k = 0
 
-    for t in range(2, N_frames, 4):
-        # draw_plot_3D(emb, counter_norm[:, color_column], particle_size, N_frames=N_frames, t=t, k=t,
-        #              save_path=f"{MOVIE_IMAGE_DIR}",
-        #              colormap=colormaps[color_column], dpi=config.OUTPUT_DPI_MOVIE, a=5)
+    for t in range(N_frames - 20, N_frames, 4):
+        draw_plot_3D(emb, counter_norm[:, color_column], particle_size, N_frames=N_frames, t=t, k=k,
+                     save_path=f"{MOVIE_IMAGE_DIR}",
+                     colormap=colormaps[color_column], dpi=config.OUTPUT_DPI_MOVIE, a=5)
 
-        title = f"{int(counter_norm[t, 0])} Days | {int(np.floor((n_hours - 1)*2*counter_norm[t, 1]))} Hours | {int(np.floor((n_mins - 1) * 4*counter_norm[t, 2]))} Minutes | {int(np.floor((n_secs - 1) * 12*counter_norm[t, 3]))} Seconds"
-        draw_plot_3D_growing(emb, counter_norm[:, color_column], particle_size, N_frames=N_frames, t=t, k=t,
-                             save_path=f"{MOVIE_IMAGE_DIR}",
-                             colormap=colormaps[color_column], dpi=config.OUTPUT_DPI_MOVIE, a=5, title=title)
+        # title = f"{int(counter_norm[t, 0])} Days | {int(np.floor((n_hours - 1) * 2 * counter_norm[t, 1]))} Hours | {int(np.floor((n_mins - 1) * 4 * counter_norm[t, 2]))} Minutes | {int(np.floor((n_secs - 1) * 12 * counter_norm[t, 3]))} Seconds"
+        # draw_plot_3D_growing(emb, counter_norm[:, color_column], particle_size, N_frames=N_frames, t=t, k=k,
+        #                      save_path=f"{MOVIE_IMAGE_DIR}",
+        #                      colormap=colormaps[color_column], dpi=config.OUTPUT_DPI_MOVIE, a=5, title=title)
+        k += 1

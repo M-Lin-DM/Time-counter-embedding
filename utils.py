@@ -24,7 +24,7 @@ def azimuth(f):
         Returns:
             The azimuth angle of the camera, in degrees.
         """
-    return f * 180*0.2 +90
+    return f * 180*0.5 +45
 
 
 def elevation(f):
@@ -37,11 +37,11 @@ def elevation(f):
         Returns:
             The azimuth angle of the camera, in degrees.
         """
-    return 50 + 5*np.sin(f * np.pi * 2*0.2)
+    return 35 + 5*np.sin(f * np.pi * 2*0.5)
 
 
 def cam_dist(f):
-    return 3.8 + 0.3*np.sin(f * np.pi * 2*0.2)
+    return 4.6 + 0.3*np.sin(f * np.pi * 2*0.2)
 
 
 def draw_plot_3D_growing(pos, colors, sizes, N_frames=100, t=1, k=0, save_path=f"path/to/images", colormap="jet",
@@ -54,13 +54,13 @@ def draw_plot_3D_growing(pos, colors, sizes, N_frames=100, t=1, k=0, save_path=f
     fig = plt.figure(figsize=(b, b))
     ax = fig.add_subplot(projection='3d')
     ax.plot(pos[:t, 0], pos[:t, 1], pos[:t, 2], color='w', linewidth=1)
-    ax.scatter(pos[:t, 0], pos[:t, 1], pos[:t, 2], c=colors[:t], s=sizes, depthshade=True, cmap=colormap)
+    ax.scatter(pos[:t, 0], pos[:t, 1], pos[:t, 2], c=colors[:t], s=sizes, depthshade=False, cmap=colormap)
     ax.scatter(pos[t - 1, 0], pos[t - 1, 1], pos[t - 1, 2], c=colors[t - 1], s=sizes * 7, depthshade=False,
                cmap=colormap)
 
     # if title is not None:
     # plt.title(title, fontsize=18)
-    ax.text(1.5, 0, 2, title, fontsize=50, color='white')
+    # ax.text(2, -3, -3, title, fontsize=50, color='white')
 
     ax.set_axis_off()
     fig.set_facecolor("black")
@@ -86,7 +86,7 @@ def draw_plot_3D(pos, colors, sizes, N_frames=100, t=1, k=0, save_path=f"path/to
 
     fig = plt.figure(figsize=(b, b))
     ax = fig.add_subplot(projection='3d')
-    ax.plot(pos[:, 0], pos[:, 1], pos[:, 2], color='w', linewidth=.1)
+    ax.plot(pos[:, 0], pos[:, 1], pos[:, 2], color='w', linewidth=.5)
     ax.scatter(pos[:, 0], pos[:, 1], pos[:, 2], c=colors, s=sizes, depthshade=True, cmap=colormap)
     ax.scatter(pos[t, 0], pos[t, 1], pos[t, 2], c=colors[t], s=sizes*5, depthshade=True, cmap=colormap)
 
